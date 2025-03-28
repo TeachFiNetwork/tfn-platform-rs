@@ -3,6 +3,7 @@
 multiversx_sc::imports!();
 
 pub mod common;
+pub mod helpers;
 
 use common::{config::*, errors::*};
 
@@ -11,12 +12,14 @@ pub trait TFNPlatformContract<ContractReader>:
     common::config::ConfigModule
 {
     #[init]
-    fn init(&self) {
-        self.set_state_inactive();
+    fn init(
+        &self,
+        main_dao: ManagedAddress,
+    ) {
+        self.main_dao().set(main_dao);
     }
 
     #[upgrade]
     fn upgrade(&self) {
-        self.set_state_inactive();
     }
 }

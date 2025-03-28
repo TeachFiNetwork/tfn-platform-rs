@@ -28,4 +28,9 @@ pub trait ConfigModule {
     #[view(getState)]
     #[storage_mapper("state")]
     fn state(&self) -> SingleValueMapper<State>;
+
+    // main dao
+    #[view(getMainDao)]
+    #[storage_mapper("main_dao")]
+    fn main_dao(&self) -> SingleValueMapper<ManagedAddress>;
 }
