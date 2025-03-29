@@ -24,7 +24,6 @@ common::config::ConfigModule
         self.governance_token().set(governance_token);
         self.subscription_period().set(DEFAULT_VALIDITY);
         self.max_subscriber_addresses().set(DEFAULT_MAX_SUBSCRIBERS);
-        self.set_state_active();
     }
 
     #[upgrade]
