@@ -1,0 +1,15 @@
+pub static ERROR_LAUNCHPAD_NOT_SET: &[u8] = b"launchpad not set";
+pub static ERROR_DEX_NOT_SET: &[u8] = b"dex not set";
+pub static ERROR_STAKING_NOT_SET: &[u8] = b"staking not set";
+pub static ERROR_NFT_MARKETPLACE_NOT_SET: &[u8] = b"nft marketplace not set";
+pub static ERROR_STATE_INACTIVE: &[u8] = b"contract is inactive";
+pub static ERROR_WRONG_PAYMENT_TOKEN: &[u8] = b"wrong payment token";
+pub static ERROR_WRONG_PAYMENT_AMOUNT: &[u8] = b"wrong payment amount";
+pub static ERROR_ALREADY_SUBSCRIBED: &[u8] = b"already subscribed";
+pub static ERROR_NOT_SUBSCRIBED: &[u8] = b"not subscribed";
+pub static ERROR_SUBSCRIPTION_EXPIRED: &[u8] = b"subscription expired";
+pub static ERROR_NOT_ALLOWED: &[u8] = b"action not allowed";
+pub static ERROR_TOO_MANY_ADDRESSES: &[u8] = b"too many addresses";
+pub static ERROR_ALREADY_WHITELISTED: &[u8] = b"address already whitelisted";
+pub static ERROR_NOT_WHITELISTED: &[u8] = b"address not whitelisted";
+pub static ERROR_ONLY_FRANCHISE: &[u8] = b"only a franchise can call this function";
