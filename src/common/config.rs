@@ -150,4 +150,40 @@ pub trait ConfigModule {
 
         sc_panic!(ERROR_NOT_WHITELISTED)
     }
+
+    #[view(getActiveSubscribersCount)]
+    fn get_active_subscribers_count(&self) -> usize {
+        let current_time = self.blockchain().get_block_timestamp();
+        let mut count = 0;
+        for i in 0..self.last_subscriber_id().get() {
+            if self.subscription_validity(i).get() > current_time {
+                count += 1;
+            }
+        }
+
+        count
+    }
+
+    #[view(getWhitelistedWalletsCount)]
+    fn get_whitelisted_wallets_count(&self) -> usize {
+        let mut count = 0;
+        for i in 0..self.last_subscriber_id().get() {
+            count += self.whitelisted_addresses(i).len();
+        }
+
+        count
+    }
+
+    #[view(getActiveWhitelistedWalletsCount)]
+    fn get_active_whitelisted_wallets_count(&self) -> usize {
+        let current_time = self.blockchain().get_block_timestamp();
+        let mut count = 0;
+        for i in 0..self.last_subscriber_id().get() {
+            if self.subscription_validity(i).get() > current_time {
+                count += self.whitelisted_addresses(i).len();
+            }
+        }
+
+        count
+    }
 }
