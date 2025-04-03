@@ -229,7 +229,7 @@ pub trait ConfigModule {
             }
         }
 
-        if is_subscriber.is_some() || subscriptions.len() > 0 {
+        if is_subscriber.is_some() || !subscriptions.is_empty() {
             return (is_subscriber, subscriptions);
         }
 
