@@ -2,7 +2,7 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
-use tfn_dao::common::config::ProxyTrait as _;
+use crate::proxies::dao_proxy::{self};
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -30,6 +30,10 @@ pub struct Subscriber<M: ManagedTypeApi> {
     pub id: u64,
     pub address: ManagedAddress<M>,
     pub details: SubscriberDetails<M>,
+    pub launchpad_sc: ManagedAddress<M>,
+    pub dex_sc: ManagedAddress<M>,
+    pub staking_sc: ManagedAddress<M>,
+    pub nft_marketplace_sc: ManagedAddress<M>,
     pub validity: u64,
 }
 
@@ -205,7 +209,34 @@ pub trait ConfigModule {
         count
     }
 
+    #[view(getAddressDetails)]
+    fn get_address_details(
+        &self,
+        address: ManagedAddress,
+    ) -> (
+        Option<Subscriber<Self::Api>>,
+        ManagedVec<Self::Api, Subscriber<Self::Api>>, // user subscribers
+    ) {
+        let mut is_subscriber: Option<Subscriber<Self::Api>> = None;
+        let mut subscriptions: ManagedVec<Self::Api, Subscriber<Self::Api>> = ManagedVec::new();
+        for id in 0..self.last_subscriber_id().get() {
+            let subscriber = self.subscribers(id).get();
+            if self.whitelisted_addresses(id).contains(&address) {
+                subscriptions.push(subscriber.clone());
+            }
+            if subscriber.address == address {
+                is_subscriber = Some(subscriber);
+            }
+        }
+
+        if is_subscriber.is_some() || subscriptions.len() > 0 {
+            return (is_subscriber, subscriptions);
+        }
+
+        sc_panic!(ERROR_NOT_WHITELISTED)
+    }
+
     // proxies
     #[proxy]
-    fn dao_contract_proxy(&self) -> tfn_dao::Proxy<Self::Api>;
+    fn dao_contract_proxy(&self) -> dao_proxy::Proxy<Self::Api>;
 }

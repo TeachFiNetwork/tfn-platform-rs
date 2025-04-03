@@ -3,9 +3,10 @@
 multiversx_sc::imports!();
 
 pub mod common;
+pub mod proxies;
 
 use common::{config::*, consts::*, errors::*};
-use tfn_dao::{common::{config::ProxyTrait as _, errors::ERROR_ONLY_LAUNCHPAD}, ProxyTrait as _};
+use proxies::{dao_proxy::ProxyTrait as _, template_proxy::{self}};
 
 #[multiversx_sc::contract]
 pub trait TFNPlatformContract<ContractReader>:
@@ -32,6 +33,39 @@ common::config::ConfigModule
     fn upgrade(&self) {
     }
 
+    fn deploy_contracts(&self) -> (ManagedAddress, ManagedAddress, ManagedAddress, ManagedAddress) {
+        let (launchpad_address, ()) = self
+            .template_contract_proxy()
+            .init()
+            .deploy_from_source(
+                &self.template_test_launchpad().get(),
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC,
+            );
+        let (dex_address, ()) = self
+            .template_contract_proxy()
+            .init()
+            .deploy_from_source(
+                &self.template_test_dex().get(),
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC,
+            );
+        let (staking_address, ()) = self
+            .template_contract_proxy()
+            .init()
+            .deploy_from_source(
+                &self.template_test_staking().get(),
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC,
+            );
+        let (nft_marketplace_address, ()) = self
+            .template_contract_proxy()
+            .init()
+            .deploy_from_source(
+                &self.template_nft_marketplace().get(),
+                CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC,
+            );
+
+        (launchpad_address, dex_address, staking_address, nft_marketplace_address)
+    }
+
     #[payable("*")]
     #[endpoint(subscribe)]
     fn subscribe(
@@ -52,12 +86,17 @@ common::config::ConfigModule
             None => {
                 require!(details.is_some(), ERROR_NO_DETAILS);
 
+                let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) = self.deploy_contracts();
                 let subscriber_id = self.last_subscriber_id().get();
                 self.last_subscriber_id().set(subscriber_id + 1);
                 let subscriber = Subscriber {
                     id: subscriber_id,
                     address: caller,
                     details: details.into_option().unwrap(),
+                    launchpad_sc,
+                    staking_sc,
+                    dex_sc,
+                    nft_marketplace_sc,
                     validity: 0,
                 };
                 self.subscribers(subscriber_id).set(&subscriber);
@@ -112,12 +151,17 @@ common::config::ConfigModule
         require!(self.blockchain().get_caller() == launchpad, ERROR_ONLY_LAUNCHPAD);
         require!(self.get_subscriber_id_by_address(&franchise_address).is_none(), ERROR_ALREADY_SUBSCRIBED);
 
+        let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) = self.deploy_contracts();
         let subscriber_id = self.last_subscriber_id().get();
         self.last_subscriber_id().set(subscriber_id + 1);
         let subscriber = Subscriber {
             id: subscriber_id,
             address: franchise_address,
             details,
+            launchpad_sc,
+            staking_sc,
+            dex_sc,
+            nft_marketplace_sc,
             validity: self.blockchain().get_block_timestamp() + VALIDITY_FOR_FRANCHISE,
         };
         self.subscribers(subscriber_id).set(subscriber);
@@ -165,4 +209,8 @@ common::config::ConfigModule
             .is_franchise(address)
             .execute_on_dest_context()
     }
+
+    // proxies
+    #[proxy]
+    fn template_contract_proxy(&self) -> template_proxy::Proxy<Self::Api>;
 }
