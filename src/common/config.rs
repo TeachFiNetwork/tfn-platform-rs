@@ -2,6 +2,7 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 use crate::common::errors::*;
+use tfn_dao::common::config::ProxyTrait as _;
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -10,16 +11,35 @@ pub enum State {
     Active,
 }
 
+#[type_abi]
+#[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
+pub struct SubscriberDetails<M: ManagedTypeApi> {
+    pub name: ManagedBuffer<M>,
+    pub description: ManagedBuffer<M>,
+    pub logo: ManagedBuffer<M>,
+    pub card: ManagedBuffer<M>,
+    pub website: ManagedBuffer<M>,
+    pub email: ManagedBuffer<M>,
+    pub twitter: ManagedBuffer<M>,
+    pub telegram: ManagedBuffer<M>,
+}
+
+#[type_abi]
+#[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
+pub struct Subscriber<M: ManagedTypeApi> {
+    pub id: u64,
+    pub address: ManagedAddress<M>,
+    pub details: SubscriberDetails<M>,
+    pub validity: u64,
+}
+
 #[multiversx_sc::module]
 pub trait ConfigModule {
     // state
     #[only_owner]
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
-        require!(!self.test_launchpad().is_empty(), ERROR_LAUNCHPAD_NOT_SET);
-        require!(!self.test_dex().is_empty(), ERROR_DEX_NOT_SET);
-        require!(!self.test_staking().is_empty(), ERROR_STAKING_NOT_SET);
-        require!(!self.nft_marketplace().is_empty(), ERROR_NFT_MARKETPLACE_NOT_SET);
+        require!(!self.main_dao().is_empty(), ERROR_DAO_NOT_SET);
 
         self.state().set(State::Active);
     }
@@ -39,50 +59,55 @@ pub trait ConfigModule {
     #[storage_mapper("governance_token")]
     fn governance_token(&self) -> SingleValueMapper<TokenIdentifier>;
 
-    // contracts
-    #[view(getMainDao)]
+    // CONTRACTS
+    #[view(getMainDAO)]
     #[storage_mapper("main_dao")]
     fn main_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
-    #[view(getTestLaunchpad)]
-    #[storage_mapper("test_launchpad")]
-    fn test_launchpad(&self) -> SingleValueMapper<ManagedAddress>;
-
     #[only_owner]
-    #[endpoint(setTestLaunchpad)]
-    fn set_test_launchpad(&self, address: ManagedAddress) {
-        self.test_launchpad().set(address);
+    #[endpoint(setMainDAO)]
+    fn set_main_dao(&self, address: ManagedAddress) {
+        require!(self.main_dao().is_empty(), ERROR_DAO_ALREADY_SET);
+
+        self.main_dao().set(&address);
+        let governance_token: TokenIdentifier = self.dao_contract_proxy()
+            .contract(address)
+            .governance_token()
+            .execute_on_dest_context();
+        self.governance_token().set(governance_token);
     }
 
-    #[view(getTestDEX)]
-    #[storage_mapper("test_dex")]
-    fn test_dex(&self) -> SingleValueMapper<ManagedAddress>;
+    #[view(getTemplateTestLaunchpad)]
+    #[storage_mapper("template_test_launchpad")]
+    fn template_test_launchpad(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(getTemplateTestDEX)]
+    #[storage_mapper("template_test_dex")]
+    fn template_test_dex(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(getTemplateTestStaking)]
+    #[storage_mapper("template_test_staking")]
+    fn template_test_staking(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(getTemplateNFTMarketplace)]
+    #[storage_mapper("template_nft_marketplace")]
+    fn template_nft_marketplace(&self) -> SingleValueMapper<ManagedAddress>;
 
     #[only_owner]
-    #[endpoint(setTestDEX)]
-    fn set_test_dex(&self, address: ManagedAddress) {
-        self.test_dex().set(address);
+    #[endpoint(setTemplateAddresses)]
+    fn set_template_addresses(
+        &self,
+        template_test_launchpad: ManagedAddress,
+        template_test_dex: ManagedAddress,
+        template_test_staking: ManagedAddress,
+        template_nft_marketplace: ManagedAddress,
+    ) {
+        self.template_test_launchpad().set(&template_test_launchpad);
+        self.template_test_dex().set(&template_test_dex);
+        self.template_test_staking().set(&template_test_staking);
+        self.template_nft_marketplace().set(&template_nft_marketplace);
     }
-
-    #[view(getTestStaking)]
-    #[storage_mapper("test_staking")]
-    fn test_staking(&self) -> SingleValueMapper<ManagedAddress>;
-
-    #[only_owner]
-    #[endpoint(setTestStaking)]
-    fn set_test_staking(&self, address: ManagedAddress) {
-        self.test_staking().set(address);
-    }
-
-    #[view(getNFTMarketplace)]
-    #[storage_mapper("nft_marketplace")]
-    fn nft_marketplace(&self) -> SingleValueMapper<ManagedAddress>;
-
-    #[only_owner]
-    #[endpoint(setNFTMarketplace)]
-    fn set_nft_marketplace(&self, address: ManagedAddress) {
-        self.nft_marketplace().set(address);
-    }
+    // END CONTRACTS
 
     // subscription params
     #[view(getSubscriptionFee)]
@@ -100,28 +125,21 @@ pub trait ConfigModule {
     // subscribers
     #[view(getSubscriber)]
     #[storage_mapper("subscribers")]
-    fn subscribers(&self, id: u64) -> SingleValueMapper<ManagedAddress>;
+    fn subscribers(&self, id: u64) -> SingleValueMapper<Subscriber<Self::Api>>;
 
     #[view(getLastSubscriberId)]
     #[storage_mapper("last_subscriber_id")]
     fn last_subscriber_id(&self) -> SingleValueMapper<u64>;
-
-    #[view(getSubscriptionValidity)]
-    #[storage_mapper("subscription_validity")]
-    fn subscription_validity(&self, id: u64) -> SingleValueMapper<u64>;
 
     #[view(getWhitelistedAddresses)]
     #[storage_mapper("whitelisted_addresses")]
     fn whitelisted_addresses(&self, subscriber_id: u64) -> UnorderedSetMapper<ManagedAddress>;
 
     #[view(getSubscribers)]
-    fn get_subscribers(&self) -> ManagedVec<ManagedAddress> {
-        let mut subscribers: ManagedVec<ManagedAddress> = ManagedVec::new();
-        for i in 0..self.last_subscriber_id().get() {
-            let subscriber = self.subscribers(i).get();
-            if subscriber != ManagedAddress::zero() {
-                subscribers.push(subscriber);
-            }
+    fn get_subscribers(&self) -> ManagedVec<Subscriber<Self::Api>> {
+        let mut subscribers = ManagedVec::new();
+        for id in 0..self.last_subscriber_id().get() {
+            subscribers.push(self.subscribers(id).get());
         }
 
         subscribers
@@ -129,7 +147,7 @@ pub trait ConfigModule {
 
     #[view(getSubscriberIdByAddress)]
     fn get_subscriber_id_by_address(&self, address: &ManagedAddress) -> Option<u64> {
-        (0..self.last_subscriber_id().get()).find(|&i| &self.subscribers(i).get() == address)
+        (0..self.last_subscriber_id().get()).find(|&i| &self.subscribers(i).get().address == address)
     }
 
     #[view(checkWhitelisted)]
@@ -143,7 +161,7 @@ pub trait ConfigModule {
                 continue
             }
 
-            if self.subscription_validity(subscriber_id).get() > current_time {
+            if self.subscribers(subscriber_id).get().validity > current_time {
                 return
             }
         }
@@ -155,8 +173,8 @@ pub trait ConfigModule {
     fn get_active_subscribers_count(&self) -> usize {
         let current_time = self.blockchain().get_block_timestamp();
         let mut count = 0;
-        for i in 0..self.last_subscriber_id().get() {
-            if self.subscription_validity(i).get() > current_time {
+        for id in 0..self.last_subscriber_id().get() {
+            if self.subscribers(id).get().validity > current_time {
                 count += 1;
             }
         }
@@ -178,12 +196,16 @@ pub trait ConfigModule {
     fn get_active_whitelisted_wallets_count(&self) -> usize {
         let current_time = self.blockchain().get_block_timestamp();
         let mut count = 0;
-        for i in 0..self.last_subscriber_id().get() {
-            if self.subscription_validity(i).get() > current_time {
-                count += self.whitelisted_addresses(i).len();
+        for id in 0..self.last_subscriber_id().get() {
+            if self.subscribers(id).get().validity > current_time {
+                count += self.whitelisted_addresses(id).len();
             }
         }
 
         count
     }
+
+    // proxies
+    #[proxy]
+    fn dao_contract_proxy(&self) -> tfn_dao::Proxy<Self::Api>;
 }
