@@ -16,4 +16,7 @@ pub trait MainDAOProxy {
     #[view(getLaunchpadAddress)]
     #[storage_mapper("launchpad_sc")]
     fn launchpad_sc(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(isBoardMember)]
+    fn is_board_member(&self, address: &ManagedAddress) -> bool;
 }

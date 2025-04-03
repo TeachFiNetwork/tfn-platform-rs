@@ -223,7 +223,10 @@ common::config::ConfigModule
         let caller = self.blockchain().get_caller();
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
-                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+                require!(
+                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    ERROR_NOT_ALLOWED,
+                );
 
                 address
             },
@@ -259,7 +262,10 @@ common::config::ConfigModule
         let caller = self.blockchain().get_caller();
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
-                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+                require!(
+                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    ERROR_NOT_ALLOWED,
+                );
 
                 address
             },
@@ -295,7 +301,10 @@ common::config::ConfigModule
         let caller = self.blockchain().get_caller();
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
-                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+                require!(
+                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    ERROR_NOT_ALLOWED,
+                );
 
                 address
             },
@@ -331,7 +340,10 @@ common::config::ConfigModule
         let caller = self.blockchain().get_caller();
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
-                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+                require!(
+                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    ERROR_NOT_ALLOWED,
+                );
 
                 address
             },
@@ -361,6 +373,13 @@ common::config::ConfigModule
         self.dao_contract_proxy()
             .contract(self.main_dao().get())
             .is_franchise(address)
+            .execute_on_dest_context()
+    }
+
+    fn is_dao_board_member(&self, address: &ManagedAddress) -> bool {
+        self.dao_contract_proxy()
+            .contract(self.main_dao().get())
+            .is_board_member(address)
             .execute_on_dest_context()
     }
 
