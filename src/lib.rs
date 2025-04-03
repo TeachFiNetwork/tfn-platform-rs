@@ -123,14 +123,24 @@ common::config::ConfigModule
     fn change_details(
         &self,
         new_details: SubscriberDetails<Self::Api>,
+        opt_subscriber_address: OptionalValue<ManagedAddress>,
     ) {
         require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
 
         let caller = self.blockchain().get_caller();
-        let subscriber_id = match self.get_subscriber_id_by_address(&caller) {
+        let subscriber_address = match opt_subscriber_address {
+            OptionalValue::Some(address) => {
+                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+
+                address
+            },
+            OptionalValue::None => caller
+        };
+        let subscriber_id = match self.get_subscriber_id_by_address(&subscriber_address) {
             Some(subscriber_id) => subscriber_id,
             None => sc_panic!(ERROR_NOT_SUBSCRIBED)
         };
+
         let mut subscriber = self.subscribers(subscriber_id).get();
         subscriber.details = new_details;
         self.subscribers(subscriber_id).set(subscriber);
@@ -200,6 +210,150 @@ common::config::ConfigModule
         };
 
         self.whitelisted_addresses(subscriber_id).swap_remove(&address);
+    }
+
+    #[endpoint(upgradeLaunchpad)]
+    fn upgrade_launchpad(
+        &self,
+        opt_subscriber_address: Option<ManagedAddress>,
+        args: OptionalValue<ManagedArgBuffer<Self::Api>>
+    ) {
+        require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
+
+        let caller = self.blockchain().get_caller();
+        let subscriber_address = match opt_subscriber_address {
+            Some(address) => {
+                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+
+                address
+            },
+            None => caller
+        };
+        let subscriber_id = match self.get_subscriber_id_by_address(&subscriber_address) {
+            Some(subscriber_id) => subscriber_id,
+            None => sc_panic!(ERROR_NOT_SUBSCRIBED)
+        };
+        let upgrade_args = match args {
+            OptionalValue::Some(args) => args,
+            OptionalValue::None => ManagedArgBuffer::new(),            
+        };
+        let subscriber = self.subscribers(subscriber_id).get();
+        self.tx()
+            .to(subscriber.launchpad_sc)
+            .gas(self.blockchain().get_gas_left())
+            .raw_upgrade()
+            .arguments_raw(upgrade_args)
+            .from_source(self.template_test_launchpad().get())
+            .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
+            .upgrade_async_call_and_exit();
+    }
+
+    #[endpoint(upgradeDEX)]
+    fn upgrade_dex(
+        &self,
+        opt_subscriber_address: Option<ManagedAddress>,
+        args: OptionalValue<ManagedArgBuffer<Self::Api>>
+    ) {
+        require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
+
+        let caller = self.blockchain().get_caller();
+        let subscriber_address = match opt_subscriber_address {
+            Some(address) => {
+                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+
+                address
+            },
+            None => caller
+        };
+        let subscriber_id = match self.get_subscriber_id_by_address(&subscriber_address) {
+            Some(subscriber_id) => subscriber_id,
+            None => sc_panic!(ERROR_NOT_SUBSCRIBED)
+        };
+        let upgrade_args = match args {
+            OptionalValue::Some(args) => args,
+            OptionalValue::None => ManagedArgBuffer::new(),            
+        };
+        let subscriber = self.subscribers(subscriber_id).get();
+        self.tx()
+            .to(subscriber.dex_sc)
+            .gas(self.blockchain().get_gas_left())
+            .raw_upgrade()
+            .arguments_raw(upgrade_args)
+            .from_source(self.template_test_dex().get())
+            .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
+            .upgrade_async_call_and_exit();
+    }
+
+    #[endpoint(upgradeStaking)]
+    fn upgrade_staking(
+        &self,
+        opt_subscriber_address: Option<ManagedAddress>,
+        args: OptionalValue<ManagedArgBuffer<Self::Api>>
+    ) {
+        require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
+
+        let caller = self.blockchain().get_caller();
+        let subscriber_address = match opt_subscriber_address {
+            Some(address) => {
+                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+
+                address
+            },
+            None => caller
+        };
+        let subscriber_id = match self.get_subscriber_id_by_address(&subscriber_address) {
+            Some(subscriber_id) => subscriber_id,
+            None => sc_panic!(ERROR_NOT_SUBSCRIBED)
+        };
+        let upgrade_args = match args {
+            OptionalValue::Some(args) => args,
+            OptionalValue::None => ManagedArgBuffer::new(),            
+        };
+        let subscriber = self.subscribers(subscriber_id).get();
+        self.tx()
+            .to(subscriber.staking_sc)
+            .gas(self.blockchain().get_gas_left())
+            .raw_upgrade()
+            .arguments_raw(upgrade_args)
+            .from_source(self.template_test_staking().get())
+            .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
+            .upgrade_async_call_and_exit();
+    }
+
+    #[endpoint(upgradeNFTMarketplace)]
+    fn upgrade_nft_marketplace(
+        &self,
+        opt_subscriber_address: Option<ManagedAddress>,
+        args: OptionalValue<ManagedArgBuffer<Self::Api>>
+    ) {
+        require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
+
+        let caller = self.blockchain().get_caller();
+        let subscriber_address = match opt_subscriber_address {
+            Some(address) => {
+                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
+
+                address
+            },
+            None => caller
+        };
+        let subscriber_id = match self.get_subscriber_id_by_address(&subscriber_address) {
+            Some(subscriber_id) => subscriber_id,
+            None => sc_panic!(ERROR_NOT_SUBSCRIBED)
+        };
+        let upgrade_args = match args {
+            OptionalValue::Some(args) => args,
+            OptionalValue::None => ManagedArgBuffer::new(),            
+        };
+        let subscriber = self.subscribers(subscriber_id).get();
+        self.tx()
+            .to(subscriber.nft_marketplace_sc)
+            .gas(self.blockchain().get_gas_left())
+            .raw_upgrade()
+            .arguments_raw(upgrade_args)
+            .from_source(self.template_nft_marketplace().get())
+            .code_metadata(CodeMetadata::UPGRADEABLE | CodeMetadata::READABLE | CodeMetadata::PAYABLE_BY_SC)
+            .upgrade_async_call_and_exit();
     }
 
     // helpers
