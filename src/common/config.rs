@@ -68,17 +68,19 @@ pub trait ConfigModule {
     #[storage_mapper("main_dao")]
     fn main_dao(&self) -> SingleValueMapper<ManagedAddress>;
 
-    #[only_owner]
+    // should be called only by the DAO SC at initialization
     #[endpoint(setMainDAO)]
-    fn set_main_dao(&self, address: ManagedAddress) {
+    fn set_main_dao(&self) {
         require!(self.main_dao().is_empty(), ERROR_DAO_ALREADY_SET);
 
-        self.main_dao().set(&address);
+        let caller = self.blockchain().get_caller();
+        self.main_dao().set(&caller);
         let governance_token: TokenIdentifier = self.dao_contract_proxy()
-            .contract(address)
+            .contract(caller)
             .governance_token()
             .execute_on_dest_context();
         self.governance_token().set(governance_token);
+        self.set_state_active();
     }
 
     #[view(getTemplateTestLaunchpad)]
