@@ -132,11 +132,11 @@ common::config::ConfigModule
     ) {
         require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
 
-        let launchpad: ManagedAddress = self.dao_contract_proxy()
+        let launchpad_address: ManagedAddress = self.dao_contract_proxy()
             .contract(self.main_dao().get())
             .launchpad_sc()
             .execute_on_dest_context();
-        require!(self.blockchain().get_caller() == launchpad, ERROR_ONLY_LAUNCHPAD);
+        require!(self.blockchain().get_caller() == launchpad_address, ERROR_ONLY_LAUNCHPAD);
         require!(self.get_subscriber_id_by_address(&franchise_address).is_none(), ERROR_ALREADY_SUBSCRIBED);
 
         let identity: Identity<Self::Api> = self.digital_identity_contract_proxy()
