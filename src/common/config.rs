@@ -13,23 +13,10 @@ pub enum State {
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
-pub struct SubscriberDetails<M: ManagedTypeApi> {
-    pub name: ManagedBuffer<M>,
-    pub description: ManagedBuffer<M>,
-    pub logo: ManagedBuffer<M>,
-    pub card: ManagedBuffer<M>,
-    pub website: ManagedBuffer<M>,
-    pub email: ManagedBuffer<M>,
-    pub twitter: ManagedBuffer<M>,
-    pub telegram: ManagedBuffer<M>,
-}
-
-#[type_abi]
-#[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
 pub struct Subscriber<M: ManagedTypeApi> {
     pub id: u64,
     pub address: ManagedAddress<M>,
-    pub details: SubscriberDetails<M>,
+    pub identity_id: u64,
     pub launchpad_sc: ManagedAddress<M>,
     pub dex_sc: ManagedAddress<M>,
     pub staking_sc: ManagedAddress<M>,
@@ -80,7 +67,18 @@ pub trait ConfigModule {
             .governance_token()
             .execute_on_dest_context();
         self.governance_token().set(governance_token);
-        self.set_state_active();
+    }
+
+    #[view(getDigitalIdentity)]
+    #[storage_mapper("digital_identity")]
+    fn digital_identity(&self) -> SingleValueMapper<ManagedAddress>;
+
+    // should be called only by the DAO SC at initialization
+    #[endpoint(setDigitalIdentity)]
+    fn set_digital_identity(&self, address: ManagedAddress) {
+        require!(self.digital_identity().is_empty(), ERROR_DIGITAL_IDENTITY_ALREADY_SET);
+
+        self.digital_identity().set(address);
     }
 
     #[view(getTemplateTestLaunchpad)]

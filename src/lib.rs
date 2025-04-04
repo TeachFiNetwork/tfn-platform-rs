@@ -7,6 +7,7 @@ pub mod proxies;
 
 use common::{config::*, consts::*, errors::*};
 use proxies::{dao_proxy::ProxyTrait as _, template_proxy::{self}};
+use tfn_digital_identity::common::config::{ProxyTrait as _, Identity};
 
 #[multiversx_sc::contract]
 pub trait TFNPlatformContract<ContractReader>:
@@ -70,7 +71,7 @@ common::config::ConfigModule
     #[endpoint(subscribe)]
     fn subscribe(
         &self,
-        details: OptionalValue<SubscriberDetails<Self::Api>>,
+        identity_id: OptionalValue<u64>,
     ) {
         require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
 
@@ -84,15 +85,19 @@ common::config::ConfigModule
         let mut subscriber = match self.get_subscriber_id_by_address(&caller) {
             Some(subscriber_id) => self.subscribers(subscriber_id).get(),
             None => {
-                require!(details.is_some(), ERROR_NO_DETAILS);
+                require!(identity_id.is_some(), ERROR_NO_IDENTITY);
 
+                let identity: Identity<Self::Api> = self.digital_identity_contract_proxy()
+                    .contract(self.digital_identity().get())
+                    .identities(identity_id.into_option().unwrap())
+                    .execute_on_dest_context();
                 let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) = self.deploy_contracts();
                 let subscriber_id = self.last_subscriber_id().get();
                 self.last_subscriber_id().set(subscriber_id + 1);
                 let subscriber = Subscriber {
                     id: subscriber_id,
                     address: caller,
-                    details: details.into_option().unwrap(),
+                    identity_id: identity.id,
                     launchpad_sc,
                     staking_sc,
                     dex_sc,
@@ -119,38 +124,11 @@ common::config::ConfigModule
             .execute_on_dest_context::<()>();
     }
 
-    #[endpoint(changeDetails)]
-    fn change_details(
-        &self,
-        new_details: SubscriberDetails<Self::Api>,
-        opt_subscriber_address: OptionalValue<ManagedAddress>,
-    ) {
-        require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
-
-        let caller = self.blockchain().get_caller();
-        let subscriber_address = match opt_subscriber_address {
-            OptionalValue::Some(address) => {
-                require!(address == self.blockchain().get_owner_address() || address == caller, ERROR_NOT_ALLOWED);
-
-                address
-            },
-            OptionalValue::None => caller
-        };
-        let subscriber_id = match self.get_subscriber_id_by_address(&subscriber_address) {
-            Some(subscriber_id) => subscriber_id,
-            None => sc_panic!(ERROR_NOT_SUBSCRIBED)
-        };
-
-        let mut subscriber = self.subscribers(subscriber_id).get();
-        subscriber.details = new_details;
-        self.subscribers(subscriber_id).set(subscriber);
-    }
-
     #[endpoint(subscribeFranchise)]
     fn subscribe_franchise(
         &self,
         franchise_address: ManagedAddress,
-        details: SubscriberDetails<Self::Api>,
+        identity_id: u64,
     ) {
         require!(self.state().get() == State::Active, ERROR_STATE_INACTIVE);
 
@@ -161,13 +139,17 @@ common::config::ConfigModule
         require!(self.blockchain().get_caller() == launchpad, ERROR_ONLY_LAUNCHPAD);
         require!(self.get_subscriber_id_by_address(&franchise_address).is_none(), ERROR_ALREADY_SUBSCRIBED);
 
+        let identity: Identity<Self::Api> = self.digital_identity_contract_proxy()
+            .contract(self.digital_identity().get())
+            .identities(identity_id)
+            .execute_on_dest_context();
         let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) = self.deploy_contracts();
         let subscriber_id = self.last_subscriber_id().get();
         self.last_subscriber_id().set(subscriber_id + 1);
         let subscriber = Subscriber {
             id: subscriber_id,
             address: franchise_address,
-            details,
+            identity_id: identity.id,
             launchpad_sc,
             staking_sc,
             dex_sc,
@@ -386,4 +368,7 @@ common::config::ConfigModule
     // proxies
     #[proxy]
     fn template_contract_proxy(&self) -> template_proxy::Proxy<Self::Api>;
+
+    #[proxy]
+    fn digital_identity_contract_proxy(&self) -> tfn_digital_identity::Proxy<Self::Api>;
 }
