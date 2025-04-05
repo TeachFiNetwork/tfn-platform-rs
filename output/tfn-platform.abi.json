@@ -1,0 +1,504 @@
+{
+    "buildInfo": {
+        "rustc": {
+            "version": "1.85.0",
+            "commitHash": "4d91de4e48198da2e33413efdcd9cd2cc0c46688",
+            "commitDate": "2025-02-17",
+            "channel": "Stable",
+            "short": "rustc 1.85.0 (4d91de4e4 2025-02-17)"
+        },
+        "contractCrate": {
+            "name": "tfn-platform",
+            "version": "0.0.1"
+        },
+        "framework": {
+            "name": "multiversx-sc",
+            "version": "0.54.6"
+        }
+    },
+    "name": "TFNPlatformContract",
+    "constructor": {
+        "inputs": [
+            {
+                "name": "template_test_launchpad",
+                "type": "Address"
+            },
+            {
+                "name": "template_test_dex",
+                "type": "Address"
+            },
+            {
+                "name": "template_test_staking",
+                "type": "Address"
+            },
+            {
+                "name": "template_nft_marketplace",
+                "type": "Address"
+            }
+        ],
+        "outputs": []
+    },
+    "upgradeConstructor": {
+        "inputs": [],
+        "outputs": []
+    },
+    "endpoints": [
+        {
+            "name": "subscribe",
+            "mutability": "mutable",
+            "payableInTokens": [
+                "*"
+            ],
+            "inputs": [
+                {
+                    "name": "identity_id",
+                    "type": "optional<u64>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "subscribeFranchise",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "franchise_address",
+                    "type": "Address"
+                },
+                {
+                    "name": "identity_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "whitelistAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "removeAddress",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "upgradeLaunchpad",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "opt_subscriber_address",
+                    "type": "Option<Address>"
+                },
+                {
+                    "name": "args",
+                    "type": "optional<List<bytes>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "upgradeDEX",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "opt_subscriber_address",
+                    "type": "Option<Address>"
+                },
+                {
+                    "name": "args",
+                    "type": "optional<List<bytes>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "upgradeStaking",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "opt_subscriber_address",
+                    "type": "Option<Address>"
+                },
+                {
+                    "name": "args",
+                    "type": "optional<List<bytes>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "upgradeNFTMarketplace",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "opt_subscriber_address",
+                    "type": "Option<Address>"
+                },
+                {
+                    "name": "args",
+                    "type": "optional<List<bytes>>",
+                    "multi_arg": true
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "setStateActive",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "setStateInactive",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "getState",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "State"
+                }
+            ]
+        },
+        {
+            "name": "getGovernanceToken",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "TokenIdentifier"
+                }
+            ]
+        },
+        {
+            "name": "getMainDAO",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setMainDAO",
+            "mutability": "mutable",
+            "inputs": [],
+            "outputs": []
+        },
+        {
+            "name": "getDigitalIdentity",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setDigitalIdentity",
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getTemplateTestLaunchpad",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateTestDEX",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateTestStaking",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "getTemplateNFTMarketplace",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "Address"
+                }
+            ]
+        },
+        {
+            "name": "setTemplateAddresses",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "template_test_launchpad",
+                    "type": "Address"
+                },
+                {
+                    "name": "template_test_dex",
+                    "type": "Address"
+                },
+                {
+                    "name": "template_test_staking",
+                    "type": "Address"
+                },
+                {
+                    "name": "template_nft_marketplace",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getSubscriptionFee",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "BigUint"
+                }
+            ]
+        },
+        {
+            "name": "getSubscriptionPeriod",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getMaxSubscriberAddresses",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "getSubscriber",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Subscriber"
+                }
+            ]
+        },
+        {
+            "name": "getLastSubscriberId",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u64"
+                }
+            ]
+        },
+        {
+            "name": "getWhitelistedAddresses",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "subscriber_id",
+                    "type": "u64"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "variadic<Address>",
+                    "multi_result": true
+                }
+            ]
+        },
+        {
+            "name": "getSubscribers",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "List<Subscriber>"
+                }
+            ]
+        },
+        {
+            "name": "getSubscriberIdByAddress",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "Option<u64>"
+                }
+            ]
+        },
+        {
+            "name": "checkWhitelisted",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": []
+        },
+        {
+            "name": "getActiveSubscribersCount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "getWhitelistedWalletsCount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "getActiveWhitelistedWalletsCount",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "u32"
+                }
+            ]
+        },
+        {
+            "name": "getAddressDetails",
+            "mutability": "readonly",
+            "inputs": [
+                {
+                    "name": "address",
+                    "type": "Address"
+                }
+            ],
+            "outputs": [
+                {
+                    "type": "tuple<Option<Subscriber>,List<Subscriber>>"
+                }
+            ]
+        }
+    ],
+    "esdtAttributes": [],
+    "hasCallback": false,
+    "types": {
+        "State": {
+            "type": "enum",
+            "variants": [
+                {
+                    "name": "Inactive",
+                    "discriminant": 0
+                },
+                {
+                    "name": "Active",
+                    "discriminant": 1
+                }
+            ]
+        },
+        "Subscriber": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "u64"
+                },
+                {
+                    "name": "address",
+                    "type": "Address"
+                },
+                {
+                    "name": "identity_id",
+                    "type": "u64"
+                },
+                {
+                    "name": "launchpad_sc",
+                    "type": "Address"
+                },
+                {
+                    "name": "dex_sc",
+                    "type": "Address"
+                },
+                {
+                    "name": "staking_sc",
+                    "type": "Address"
+                },
+                {
+                    "name": "nft_marketplace_sc",
+                    "type": "Address"
+                },
+                {
+                    "name": "validity",
+                    "type": "u64"
+                }
+            ]
+        }
+    }
+}
