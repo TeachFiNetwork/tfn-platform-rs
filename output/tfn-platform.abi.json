@@ -366,9 +366,14 @@
             ]
         },
         {
-            "name": "getSubscribers",
+            "name": "getAllSubscribers",
             "mutability": "readonly",
-            "inputs": [],
+            "inputs": [
+                {
+                    "name": "only_active",
+                    "type": "bool"
+                }
+            ],
             "outputs": [
                 {
                     "type": "List<Subscriber>"
@@ -402,9 +407,14 @@
             "outputs": []
         },
         {
-            "name": "getActiveSubscribersCount",
+            "name": "getSubscribersCount",
             "mutability": "readonly",
-            "inputs": [],
+            "inputs": [
+                {
+                    "name": "only_active",
+                    "type": "bool"
+                }
+            ],
             "outputs": [
                 {
                     "type": "u32"
@@ -414,17 +424,12 @@
         {
             "name": "getWhitelistedWalletsCount",
             "mutability": "readonly",
-            "inputs": [],
-            "outputs": [
+            "inputs": [
                 {
-                    "type": "u32"
+                    "name": "only_active",
+                    "type": "bool"
                 }
-            ]
-        },
-        {
-            "name": "getActiveWhitelistedWalletsCount",
-            "mutability": "readonly",
-            "inputs": [],
+            ],
             "outputs": [
                 {
                     "type": "u32"

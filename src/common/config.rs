@@ -139,11 +139,19 @@ pub trait ConfigModule {
     #[storage_mapper("whitelisted_addresses")]
     fn whitelisted_addresses(&self, subscriber_id: u64) -> UnorderedSetMapper<ManagedAddress>;
 
-    #[view(getSubscribers)]
-    fn get_subscribers(&self) -> ManagedVec<Subscriber<Self::Api>> {
+    #[view(getAllSubscribers)]
+    fn get_all_subscribers(&self, only_active: bool) -> ManagedVec<Subscriber<Self::Api>> {
+        let current_time = self.blockchain().get_block_timestamp();
         let mut subscribers = ManagedVec::new();
         for id in 0..self.last_subscriber_id().get() {
-            subscribers.push(self.subscribers(id).get());
+            if self.subscribers(id).is_empty() {
+                continue
+            }
+
+            let subscriber = self.subscribers(id).get();
+            if !only_active || subscriber.validity > current_time {
+                subscribers.push(subscriber);
+            }
         }
 
         subscribers
@@ -160,12 +168,19 @@ pub trait ConfigModule {
         address: ManagedAddress,
     ) {
         let current_time = self.blockchain().get_block_timestamp();
-        for subscriber_id in 0..self.last_subscriber_id().get() {
-            if !self.whitelisted_addresses(subscriber_id).contains(&address) {
+        for id in 0..self.last_subscriber_id().get() {
+            if self.subscribers(id).is_empty() {
                 continue
             }
 
-            if self.subscribers(subscriber_id).get().validity > current_time {
+            let subscriber = self.subscribers(id).get();
+            let is_subscriber = address == subscriber.address;
+            let is_user = self.whitelisted_addresses(id).contains(&address);
+            if !is_user && !is_subscriber {
+                continue
+            }
+
+            if subscriber.validity > current_time {
                 return
             }
         }
@@ -173,12 +188,16 @@ pub trait ConfigModule {
         sc_panic!(ERROR_NOT_WHITELISTED)
     }
 
-    #[view(getActiveSubscribersCount)]
-    fn get_active_subscribers_count(&self) -> usize {
+    #[view(getSubscribersCount)]
+    fn get_subscribers_count(&self, only_active: bool) -> usize {
         let current_time = self.blockchain().get_block_timestamp();
         let mut count = 0;
         for id in 0..self.last_subscriber_id().get() {
-            if self.subscribers(id).get().validity > current_time {
+            if self.subscribers(id).is_empty() {
+                continue
+            }
+
+            if !only_active || self.subscribers(id).get().validity > current_time {
                 count += 1;
             }
         }
@@ -187,22 +206,16 @@ pub trait ConfigModule {
     }
 
     #[view(getWhitelistedWalletsCount)]
-    fn get_whitelisted_wallets_count(&self) -> usize {
+    fn get_whitelisted_wallets_count(&self, only_active: bool) -> usize {
         let mut count = 0;
-        for i in 0..self.last_subscriber_id().get() {
-            count += self.whitelisted_addresses(i).len();
-        }
-
-        count
-    }
-
-    #[view(getActiveWhitelistedWalletsCount)]
-    fn get_active_whitelisted_wallets_count(&self) -> usize {
         let current_time = self.blockchain().get_block_timestamp();
-        let mut count = 0;
         for id in 0..self.last_subscriber_id().get() {
-            if self.subscribers(id).get().validity > current_time {
-                count += self.whitelisted_addresses(id).len();
+            if self.subscribers(id).is_empty() {
+                continue
+            }
+
+            if !only_active || self.subscribers(id).get().validity > current_time {
+                count += self.whitelisted_addresses(id).len() + 1; // +1 for the subscriber itself
             }
         }
 
@@ -220,6 +233,10 @@ pub trait ConfigModule {
         let mut is_subscriber: Option<Subscriber<Self::Api>> = None;
         let mut subscriptions: ManagedVec<Self::Api, Subscriber<Self::Api>> = ManagedVec::new();
         for id in 0..self.last_subscriber_id().get() {
+            if self.subscribers(id).is_empty() {
+                continue
+            }
+
             let subscriber = self.subscribers(id).get();
             if self.whitelisted_addresses(id).contains(&address) {
                 subscriptions.push(subscriber.clone());
@@ -229,11 +246,7 @@ pub trait ConfigModule {
             }
         }
 
-        if is_subscriber.is_some() || !subscriptions.is_empty() {
-            return (is_subscriber, subscriptions);
-        }
-
-        sc_panic!(ERROR_NOT_WHITELISTED)
+        (is_subscriber, subscriptions)
     }
 
     // proxies
