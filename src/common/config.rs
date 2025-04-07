@@ -24,6 +24,20 @@ pub struct Subscriber<M: ManagedTypeApi> {
     pub validity: u64,
 }
 
+#[type_abi]
+#[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Clone, Debug)]
+pub struct PlatformInfo<M: ManagedTypeApi> {
+    pub state: State,
+    pub governance_token: TokenIdentifier<M>,
+    pub subscription_fee: BigUint<M>,
+    pub subscription_period: u64,
+    pub max_subscriber_addresses: usize,
+    pub subscribers_count: u64,
+    pub active_subscribers_count: u64,
+    pub whitelisted_wallets_count: u64,
+    pub active_whitelisted_wallets_count: u64,
+}
+
 #[multiversx_sc::module]
 pub trait ConfigModule {
     // state
@@ -189,7 +203,7 @@ pub trait ConfigModule {
     }
 
     #[view(getSubscribersCount)]
-    fn get_subscribers_count(&self, only_active: bool) -> usize {
+    fn get_subscribers_count(&self, only_active: bool) -> u64 {
         let current_time = self.blockchain().get_block_timestamp();
         let mut count = 0;
         for id in 0..self.last_subscriber_id().get() {
@@ -206,8 +220,8 @@ pub trait ConfigModule {
     }
 
     #[view(getWhitelistedWalletsCount)]
-    fn get_whitelisted_wallets_count(&self, only_active: bool) -> usize {
-        let mut count = 0;
+    fn get_whitelisted_wallets_count(&self, only_active: bool) -> u64 {
+        let mut count = 0u64;
         let current_time = self.blockchain().get_block_timestamp();
         for id in 0..self.last_subscriber_id().get() {
             if self.subscribers(id).is_empty() {
@@ -215,7 +229,7 @@ pub trait ConfigModule {
             }
 
             if !only_active || self.subscribers(id).get().validity > current_time {
-                count += self.whitelisted_addresses(id).len() + 1; // +1 for the subscriber itself
+                count += self.whitelisted_addresses(id).len() as u64 + 1; // +1 for the subscriber itself
             }
         }
 
@@ -247,6 +261,21 @@ pub trait ConfigModule {
         }
 
         (is_subscriber, subscriptions)
+    }
+
+    #[view(getContractInfo)]
+    fn get_contract_info(&self) -> PlatformInfo<Self::Api> {
+        PlatformInfo {
+            state: self.state().get(),
+            governance_token: self.governance_token().get(),
+            subscription_fee: self.subscription_fee().get(),
+            subscription_period: self.subscription_period().get(),
+            max_subscriber_addresses: self.max_subscriber_addresses().get(),
+            subscribers_count: self.get_subscribers_count(false),
+            active_subscribers_count: self.get_subscribers_count(true),
+            whitelisted_wallets_count: self.get_whitelisted_wallets_count(false),
+            active_whitelisted_wallets_count: self.get_whitelisted_wallets_count(true),
+        }
     }
 
     // proxies

@@ -417,7 +417,7 @@
             ],
             "outputs": [
                 {
-                    "type": "u32"
+                    "type": "u64"
                 }
             ]
         },
@@ -432,7 +432,7 @@
             ],
             "outputs": [
                 {
-                    "type": "u32"
+                    "type": "u64"
                 }
             ]
         },
@@ -450,11 +450,62 @@
                     "type": "tuple<Option<Subscriber>,List<Subscriber>>"
                 }
             ]
+        },
+        {
+            "name": "getContractInfo",
+            "mutability": "readonly",
+            "inputs": [],
+            "outputs": [
+                {
+                    "type": "PlatformInfo"
+                }
+            ]
         }
     ],
     "esdtAttributes": [],
     "hasCallback": false,
     "types": {
+        "PlatformInfo": {
+            "type": "struct",
+            "fields": [
+                {
+                    "name": "state",
+                    "type": "State"
+                },
+                {
+                    "name": "governance_token",
+                    "type": "TokenIdentifier"
+                },
+                {
+                    "name": "subscription_fee",
+                    "type": "BigUint"
+                },
+                {
+                    "name": "subscription_period",
+                    "type": "u64"
+                },
+                {
+                    "name": "max_subscriber_addresses",
+                    "type": "u32"
+                },
+                {
+                    "name": "subscribers_count",
+                    "type": "u64"
+                },
+                {
+                    "name": "active_subscribers_count",
+                    "type": "u64"
+                },
+                {
+                    "name": "whitelisted_wallets_count",
+                    "type": "u64"
+                },
+                {
+                    "name": "active_whitelisted_wallets_count",
+                    "type": "u64"
+                }
+            ]
+        },
         "State": {
             "type": "enum",
             "variants": [
