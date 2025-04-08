@@ -292,7 +292,7 @@ getWhitelistedWalletsCount(only_active: bool) -> u64
 <br/>
 
 ```rust
-getAddressDetails<address: ManagedAddress) -> (Option<Subscriber>, ManagedVec<Subscriber>)
+getAddressDetails(address: ManagedAddress) -> (Option<Subscriber>, ManagedVec<Subscriber>)
 ```
 >The first result will contain Some(subscriber) if the specified address is a subscriber and None otherwise. The second result will contain the list of subscribers in which the specified address is whitelisted.
 
