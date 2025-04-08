@@ -1,37 +1,296 @@
 <p align="center">
-  <a href="https://teachfi.network/" target="blank"><img src="https://teachfi.network/teachfi-logo.svg" width="120" alt="TeachFi Logo" /></a>
+  <a href="https://teachfi.network/" target="blank"><img src="https://teachfi.network/teachfi-logo.svg" width="256" alt="TeachFi Logo" /></a>
 </p>
+<br/>
+<br/>
+<br/>
 
-## Description
+# Description
 
 The Platform SC is the back-bone of TeachFi's Educational Platform.
-
+<br/>
+<br/>
+<br/>
 ## Endpoints
 
-- subscribe(identity_id: u64)
-- subscribeFranchise(franchise_address: Address, identity_id: u64)
-- whitelistAddress(address: Address)
-- removeAddress(address: Address)
-- upgradeLaunchpad(subscriber_address: Address, arguments: ArgBuffer)
-- upgradeDEX(subscriber_address: Address, arguments: ArgBuffer)
-- upgradeStaking(subscriber_address: Address, arguments: ArgBuffer)
-- upgradeNFTMarketplace(subscriber_address: Address, arguments: ArgBuffer)
-- setStateActive() (only_owner)
-- setStateInactive() (only_owner)
-- setTemplateAddresses() (only_owner)
+<br/>
+
+```rust
+subscribe(identity_id: OptionalValue<u64>)
+```
+>[!IMPORTANT]
+>*Requirements:* state = active, payment_token = governance_token, payment_amount = subscription_fee.*
+
+>[!NOTE]
+>If the caller is an already existing subscriber, its subscription's validity period is extended. Otherwise, the `identity_id` parameter is required in order to register a new subscriber.
+For new subscribers, the SC deploys a new set of NFT Marketplace, Test Launchpad, Test DEX and Test Staking smart contracts with the same code as the template addresses.
+
+<br/>
+
+```rust
+subscribeFranchise(franchise_address: ManagedAddress, identity_id: u64)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, caller = LaunchpadSC.
+
+>[!NOTE]
+>This endpoint is called by the LaunchpadSC when a new FranchiseDAO SC is deployed and it registers the franchise's address as a subscriber for free.
+The SC deploys a new set of NFT Marketplace, Launchpad, DEX and Staking smart contracts with the same code as the template addresses.
+
+<br/>
+
+```rust
+whitelistAddress(address: ManagedAddress)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, caller is a subscriber with a valid subscription, number of subscriber's whitelisted addresses is less than max_subscriber_addresses.
+
+>[!NOTE]
+>The address parameter is whitelisted so it can access the child contracts of the subscriber.
+
+<br/>
+
+```rust
+removeAddress(address: ManagedAddress)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, caller is a subscriber.
+
+>[!NOTE]
+>The address sent as a parameter is removed from the list of whitelisted addresses and can no longer access the functionality of the subscriber's child contracts.
+
+<br/>
+
+```rust
+upgradeLaunchpad(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
+
+>[!NOTE]
+>Updates the code of the subscriber's child Test Launchpad SC with the template's code.
+
+<br/>
+
+```rust
+upgradeDEX(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
+
+>[!NOTE]
+>Updates the code of the subscriber's child Test DEX SC with the template's code.
+
+<br/>
+
+```rust
+upgradeStaking(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
+
+>[!NOTE]
+>Updates the code of the subscriber's child Test Staking SC with the template's code.
+
+<br/>
+
+```rust
+upgradeNFTMarketplace(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+```
+>[!IMPORTANT]
+*Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
+
+>[!NOTE]
+>Updates the code of the subscriber's child NFT Marketplace SC with the template's code.
+
+<br/>
+
+```rust
+setStateActive()
+```
+>[!IMPORTANT]
+*Requirements:* the caller must be the SC owner.
+
+>[!NOTE]
+>Sets the SC state as active.
+
+<br/>
+
+```rust
+setStateInactive()
+```
+>[!IMPORTANT]
+*Requirements:* the caller must be the SC owner.
+
+>[!NOTE]
+>Sets the SC state as inactive.
+
+<br/>
+
+```rust
+setTemplateAddresses(
+    template_test_launchpad: ManagedAddress,
+    template_test_dex: ManagedAddress,
+    template_test_staking: ManagedAddress,
+    template_nft_marketplace: ManagedAddress
+)
+```
+>[!IMPORTANT]
+*Requirements:* the caller must be the SC owner.
+
+>[!NOTE]
+>As the endpoint name suggests, it changes the addresses of the template smart contract addreses.
+
+>[!CAUTION]
+>However, this endpoint should basically never be called.
+
+<br/>
 
 ## View functions
 
-- getState
-- getGovernanceToken
-- getMainDAO
-- getDigitalIdentity
-- getTemplateTestLaunchpad
-- getTemplateTestDEX
-- getTemplateTestStaking
-- getTemplateNFTMarketplace
-- getSubscriptionFee
-- getSubscriptionPeriod
-- getMaxSubscriberAddresses
-- getSubscriber(subscriber_id: u64)
+<br/>
 
+```rust
+getState() -> State
+```
+>Returns the state of the SC (Active or Inactive).
+
+<br/>
+
+```rust
+getGovernanceToken() -> TokenIdentifier
+```
+>Returns the DAO's governance token, which is also the payment token of the subscription fee.
+
+<br/>
+
+```rust
+getMainDAO() -> ManagedAddress
+```
+>Returns the address of the Main DAO SC.
+
+<br/>
+
+```rust
+getDigitalIdentity() -> ManagedAddress
+```
+>Return the address of the Digital Identity SC.
+
+<br/>
+
+```rust
+getTemplateTestLaunchpad() -> ManagedAddress
+```
+>Returns the address of the Template Test Launchpad SC.
+
+<br/>
+
+```rust
+getTemplateTestDEX() -> ManagedAddress
+```
+>Returns the address of the Template Test DEX SC.
+
+<br/>
+
+```rust
+getTemplateTestStaking() -> ManagedAddress
+```
+>Returns the address of the Template Test Staking SC.
+
+<br/>
+
+```rust
+getTemplateNFTMarketplace() -> ManagedAddress
+```
+>Returns the address of the Template NFT Marketplace SC.
+
+<br/>
+
+```rust
+getSubscriptionFee() -> BigUint
+```
+>Returns the subscription fee amount (to be payed in governance tokens).
+
+<br/>
+
+```rust
+getSubscriptionPeriod() -> u64
+```
+>Returns the validity period of the subscription (default is 365 days).
+
+<br/>
+
+```rust
+getMaxSubscriberAddresses() -> usize
+```
+>Returns the maximum number of addresses a subscriber can whitelist (default is 1000).
+
+<br/>
+
+```rust
+getSubscriber(subscriber_id: u64) -> Subscriber
+```
+>Returns the Subscriber object corresponding to the subscriber_id parameter.
+
+<br/>
+
+```rust
+getLastSubscriberId() -> u64
+```
+>Returns the `ID - 1` of the last registered subscriber.
+
+<br/>
+
+```rust
+getWhitelistedAddresses(subscriber_id: u64) -> UnorderedSetMapper<ManagedAddress>
+```
+>Returns the whitelisted addresses of the subscriber identified by the subscriber_id parameter.
+
+<br/>
+
+```rust
+getAllSubscribers(only_active: bool) -> ManagedVec<Subscriber>
+```
+>Returns either all or only the active subscribers (with a valid subscription, not expired), based on the value supplied for the only_active parameter.
+
+<br/>
+
+```rust
+getSubscriberIdByAddress(address: ManagedAddress) -> Option<u64>
+```
+>Returns Some(subscriber_id) if a subscriber with the specified address parameter exists, and None otherwise.
+
+<br/>
+
+```rust
+checkWhitelisted(address: ManagedAddress)
+```
+>Looks up the specified address parameter in the whitelisted users lists of all active subscribers. If not found, it will throw a "not whitelisted error".
+
+<br/>
+
+```rust
+getSubscribersCount(only_active: bool) -> u64
+```
+>Returns either the total subscribers count or only the active subscribers count, based on the value supplied for the only_active parameter.
+
+<br/>
+
+```rust
+getWhitelistedWalletsCount(only_active: bool) -> u64
+```
+>Returns either the total whitelisted addresses count or only the whitelisted users of active subscribers count, based on the value supplied for the only_active parameter.
+
+<br/>
+
+```rust
+getAddressDetails<address: ManagedAddress) -> (Option<Subscriber>, ManagedVec<Subscriber>)
+```
+>The first result will contain Some(subscriber) if the specified address is a subscriber and None otherwise. The second result will contain the list of subscribers in which the specified address is whitelisted.
+
+<br/>
+
+```rust
+getContractInfo() -> PlatformInfo
+```
+>This is an all-in-one endpoint returning several relevant SC informations: state, governance_token, subscription_fee, subscription_period, max_subscriber_addresses, subscribers_count, active_subscribers_count, whitelisted_wallets_count, active_whitelisted_wallets_count.
