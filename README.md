@@ -30,8 +30,9 @@ subscribe(identity_id: OptionalValue<u64>)
 >[!NOTE]
 >If the caller is an already existing subscriber, its subscription's validity period is extended. Otherwise, the `identity_id` parameter is required in order to register a new subscriber.
 For new subscribers, the SC deploys a new set of NFT Marketplace, Test Launchpad, Test DEX and Test Staking smart contracts with the same code as the template addresses.
+
 >[!WARNING]
->It is mandatory that the identity_id exists in the [Digital Identity SC](https://github.com/TeachFiNetwork/tfn-digital-identity-rs).
+>It is mandatory that the `identity_id` exists in the [Digital Identity SC](https://github.com/TeachFiNetwork/tfn-digital-identity-rs).
 <br/>
 
 ```rust
