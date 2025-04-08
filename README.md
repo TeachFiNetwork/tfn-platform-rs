@@ -8,10 +8,10 @@
 # Description
 
 The Platform SC is the back-bone of TeachFi's Educational Platform. It is a subscription based service that offers the possibility to any educational institution worldwide to offer its students the opportunity to learn modern blockchain-based financial instruments and much more. For each subscriber, the Platform SC will deploy a set of smart contracts with different applications:
-- [NFT Marketplace](https://github.com/TeachFiNetwork/tfn-nft-marketplace-rs)
-- [Test Launchpad](https://github.com/TeachFiNetwork/tfn-test-launchpad-rs)
-- [Test DEX](https://github.com/TeachFiNetwork/tfn-test-dex-rs)
-- [Test Staking](https://github.com/TeachFiNetwork/tfn-test-staking-rs)
+- [NFT Marketplace](https://github.com/TeachFiNetwork/tfn-nft-marketplace-rs) - empowers students to monetize their artistic skills
+- [Test Launchpad](https://github.com/TeachFiNetwork/tfn-test-launchpad-rs) - capital raising platform for the students entrepreneurial ideas
+- [Test DEX](https://github.com/TeachFiNetwork/tfn-test-dex-rs) - decentralized market for the students' tokens with different usecases
+- [Test Staking](https://github.com/TeachFiNetwork/tfn-test-staking-rs) - teach interest earning while helping students secure their blockchain projects
 
 The subscriber will also have access to several online courses and an online shop for related educational materials.
 <br/>
