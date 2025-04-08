@@ -250,7 +250,7 @@ getLastSubscriberId() -> u64
 <br/>
 
 ```rust
-getWhitelistedAddresses(subscriber_id: u64) -> UnorderedSetMapper<ManagedAddress>
+getWhitelistedAddresses(subscriber_id: u64) -> ManagedVec<ManagedAddress>
 ```
 >Returns the whitelisted addresses of the subscriber identified by the subscriber_id parameter.
 
