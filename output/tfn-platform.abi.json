@@ -360,8 +360,7 @@
             ],
             "outputs": [
                 {
-                    "type": "variadic<Address>",
-                    "multi_result": true
+                    "type": "List<Address>"
                 }
             ]
         },

@@ -149,9 +149,18 @@ pub trait ConfigModule {
     #[storage_mapper("last_subscriber_id")]
     fn last_subscriber_id(&self) -> SingleValueMapper<u64>;
 
-    #[view(getWhitelistedAddresses)]
     #[storage_mapper("whitelisted_addresses")]
     fn whitelisted_addresses(&self, subscriber_id: u64) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[view(getWhitelistedAddresses)]
+    fn get_whitelisted_addresses(&self, subscriber_id: u64) -> ManagedVec<ManagedAddress<Self::Api>> {
+        let mut addresses = ManagedVec::new();
+        for address in self.whitelisted_addresses(subscriber_id).iter() {
+            addresses.push(address);
+        }
+
+        addresses
+    }
 
     #[view(getAllSubscribers)]
     fn get_all_subscribers(&self, only_active: bool) -> ManagedVec<Subscriber<Self::Api>> {
