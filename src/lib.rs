@@ -91,7 +91,8 @@ common::config::ConfigModule
                     .contract(self.digital_identity().get())
                     .identities(identity_id.into_option().unwrap())
                     .execute_on_dest_context();
-                let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) = self.deploy_contracts();
+                let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) =
+                    self.deploy_contracts();
                 let subscriber_id = self.last_subscriber_id().get();
                 self.last_subscriber_id().set(subscriber_id + 1);
                 let subscriber = Subscriber {
@@ -143,7 +144,8 @@ common::config::ConfigModule
             .contract(self.digital_identity().get())
             .identities(identity_id)
             .execute_on_dest_context();
-        let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) = self.deploy_contracts();
+        let (launchpad_sc, dex_sc, staking_sc, nft_marketplace_sc) =
+            self.deploy_contracts();
         let subscriber_id = self.last_subscriber_id().get();
         self.last_subscriber_id().set(subscriber_id + 1);
         let subscriber = Subscriber {
@@ -206,7 +208,7 @@ common::config::ConfigModule
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
                 require!(
-                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    caller == self.blockchain().get_owner_address() || caller == address || self.is_dao_board_member(&caller),
                     ERROR_NOT_ALLOWED,
                 );
 
@@ -245,7 +247,7 @@ common::config::ConfigModule
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
                 require!(
-                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    caller == self.blockchain().get_owner_address() || caller == address || self.is_dao_board_member(&caller),
                     ERROR_NOT_ALLOWED,
                 );
 
@@ -284,7 +286,7 @@ common::config::ConfigModule
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
                 require!(
-                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    caller == self.blockchain().get_owner_address() || caller == address || self.is_dao_board_member(&caller),
                     ERROR_NOT_ALLOWED,
                 );
 
@@ -323,7 +325,7 @@ common::config::ConfigModule
         let subscriber_address = match opt_subscriber_address {
             Some(address) => {
                 require!(
-                    address == self.blockchain().get_owner_address() || address == caller || self.is_dao_board_member(&address),
+                    caller == self.blockchain().get_owner_address() || caller == address || self.is_dao_board_member(&caller),
                     ERROR_NOT_ALLOWED,
                 );
 
