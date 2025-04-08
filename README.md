@@ -7,7 +7,13 @@
 
 # Description
 
-The Platform SC is the back-bone of TeachFi's Educational Platform.
+The Platform SC is the back-bone of TeachFi's Educational Platform. It is a subscription based service that offers the possibility to any educational institution worldwide to offer its students the opportunity to learn modern blockchain-based financial instruments and much more. For each subscriber, the Platform SC will deploy a set of smart contracts with different applications:
+- [NFT Marketplace](https://github.com/TeachFiNetwork/tfn-nft-marketplace-rs)
+- [Test Launchpad](https://github.com/TeachFiNetwork/tfn-test-launchpad-rs)
+- [Test DEX](https://github.com/TeachFiNetwork/tfn-test-dex-rs)
+- [Test Staking](https://github.com/TeachFiNetwork/tfn-test-staking-rs)
+
+The subscriber will also have access to several online courses and an online shop for related educational materials.
 <br/>
 <br/>
 <br/>
@@ -62,7 +68,7 @@ removeAddress(address: ManagedAddress)
 <br/>
 
 ```rust
-upgradeLaunchpad(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+upgradeLaunchpad(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ManagedArgBuffer>)
 ```
 >[!IMPORTANT]
 *Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
@@ -73,7 +79,7 @@ upgradeLaunchpad(subscriber_address: Option<ManagedAddress>, arguments: Optional
 <br/>
 
 ```rust
-upgradeDEX(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+upgradeDEX(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ManagedArgBuffer>)
 ```
 >[!IMPORTANT]
 *Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
@@ -84,7 +90,7 @@ upgradeDEX(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<
 <br/>
 
 ```rust
-upgradeStaking(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+upgradeStaking(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ManagedArgBuffer>)
 ```
 >[!IMPORTANT]
 *Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
@@ -95,7 +101,7 @@ upgradeStaking(subscriber_address: Option<ManagedAddress>, arguments: OptionalVa
 <br/>
 
 ```rust
-upgradeNFTMarketplace(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ArgBuffer>)
+upgradeNFTMarketplace(subscriber_address: Option<ManagedAddress>, arguments: OptionalValue<ManagedArgBuffer>)
 ```
 >[!IMPORTANT]
 *Requirements:* state = active, if the subscriber_address parameter is specified, the caller must be the SC owner or a DAO member.
@@ -294,3 +300,47 @@ getAddressDetails<address: ManagedAddress) -> (Option<Subscriber>, ManagedVec<Su
 getContractInfo() -> PlatformInfo
 ```
 >This is an all-in-one endpoint returning several relevant SC informations: state, governance_token, subscription_fee, subscription_period, max_subscriber_addresses, subscribers_count, active_subscribers_count, whitelisted_wallets_count, active_whitelisted_wallets_count.
+
+<br/>
+
+## Custom types
+
+<br/>
+
+```rust
+pub enum State {
+    Inactive,
+    Active,
+}
+```
+
+<br/>
+
+```rust
+pub struct Subscriber<M: ManagedTypeApi> {
+    pub id: u64,
+    pub address: ManagedAddress<M>,
+    pub identity_id: u64,
+    pub launchpad_sc: ManagedAddress<M>,
+    pub dex_sc: ManagedAddress<M>,
+    pub staking_sc: ManagedAddress<M>,
+    pub nft_marketplace_sc: ManagedAddress<M>,
+    pub validity: u64,
+}
+```
+
+<br/>
+
+```rust
+pub struct PlatformInfo<M: ManagedTypeApi> {
+    pub state: State,
+    pub governance_token: TokenIdentifier<M>,
+    pub subscription_fee: BigUint<M>,
+    pub subscription_period: u64,
+    pub max_subscriber_addresses: usize,
+    pub subscribers_count: u64,
+    pub active_subscribers_count: u64,
+    pub whitelisted_wallets_count: u64,
+    pub active_whitelisted_wallets_count: u64,
+}
+```
