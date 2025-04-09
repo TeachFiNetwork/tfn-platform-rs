@@ -25,7 +25,7 @@ The subscriber will also have access to several online courses and an online sho
 subscribe(identity_id: OptionalValue<u64>)
 ```
 >[!IMPORTANT]
->*Requirements:* state = active, payment_token = governance_token, payment_amount = subscription_fee.*
+>*Requirements:* state = active, payment_token = governance_token, payment_amount = subscription_fee.
 
 >[!NOTE]
 >If the caller is an already existing subscriber, its subscription's validity period is extended. Otherwise, the `identity_id` parameter is required in order to register a new subscriber.
