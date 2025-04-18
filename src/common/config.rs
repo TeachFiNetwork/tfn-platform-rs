@@ -138,7 +138,7 @@ pub trait ConfigModule {
         self.subscription_fee().set(new_fee);
     }
 
-    #[view(getSubscriptionPeriod)] // days
+    #[view(getSubscriptionPeriod)] // seconds
     #[storage_mapper("subscription_period")]
     fn subscription_period(&self) -> SingleValueMapper<u64>;
 
