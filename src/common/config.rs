@@ -132,9 +132,21 @@ pub trait ConfigModule {
     #[storage_mapper("subscription_fee")]
     fn subscription_fee(&self) -> SingleValueMapper<BigUint>;
 
+    #[only_owner]
+    #[endpoint(setSubscriptionFee)]
+    fn set_subscription_fee(&self, new_fee: BigUint) {
+        self.subscription_fee().set(new_fee);
+    }
+
     #[view(getSubscriptionPeriod)] // days
     #[storage_mapper("subscription_period")]
     fn subscription_period(&self) -> SingleValueMapper<u64>;
+
+    #[only_owner]
+    #[endpoint(setSubscriptionPeriod)]
+    fn set_subscription_period(&self, new_period: u64) {
+        self.subscription_period().set(new_period);
+    }
 
     #[view(getMaxSubscriberAddresses)]
     #[storage_mapper("max_subscriber_addresses")]

@@ -1,11 +1,11 @@
 {
     "buildInfo": {
         "rustc": {
-            "version": "1.85.0",
-            "commitHash": "4d91de4e48198da2e33413efdcd9cd2cc0c46688",
-            "commitDate": "2025-02-17",
+            "version": "1.86.0",
+            "commitHash": "05f9846f893b09a1be1fc8560e33fc3c815cfecb",
+            "commitDate": "2025-03-31",
             "channel": "Stable",
-            "short": "rustc 1.85.0 (4d91de4e4 2025-02-17)"
+            "short": "rustc 1.86.0 (05f9846f8 2025-03-31)"
         },
         "contractCrate": {
             "name": "tfn-platform",
@@ -305,6 +305,18 @@
             ]
         },
         {
+            "name": "setSubscriptionFee",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_fee",
+                    "type": "BigUint"
+                }
+            ],
+            "outputs": []
+        },
+        {
             "name": "getSubscriptionPeriod",
             "mutability": "readonly",
             "inputs": [],
@@ -313,6 +325,18 @@
                     "type": "u64"
                 }
             ]
+        },
+        {
+            "name": "setSubscriptionPeriod",
+            "onlyOwner": true,
+            "mutability": "mutable",
+            "inputs": [
+                {
+                    "name": "new_period",
+                    "type": "u64"
+                }
+            ],
+            "outputs": []
         },
         {
             "name": "getMaxSubscriberAddresses",
